@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="css/Gatitos.css" rel="stylesheet">
+    <title>Gatos</title>
+</head>
+<body>
+    <h1>Gatos</h1>
+
+    <div id="feedChat"></div>
+
+    <form id="formChat">
+        <input id="inputChat" placeholder="Escreva sua pergunta aqui!" style="width: 300px;">
+        <p></p>
+        <button type="submit" style="border-radius: 10px;">
+            Perguntar
+        </button>
+    </form>
+
+    <script>
+    // Função para adicionar uma mensagem ao feedChat
+    function adicionarMensagem(mensagem, deQuem) {
+        const feed = document.getElementById("feedChat");
+
+        mensagem = mensagem.replaceAll('\\n', "");
+        mensagem = mensagem.replace(/\[\d+\]/, "");
+
+        feed.innerHTML += `
+            <div>
+                <span>${deQuem}: ${mensagem}</span>
+            </div>
+        `;
+    }
+
+    // document.getElementById -> Obtém elemento pelo seu id
+    const form = document.getElementById("formChat");
+
+    // form.onsubmit(..) -> Registra uma função para rodar no lugar do evento
+    form.addEventListener('submit', async (e) => {
+        // <evento>.preventDefault() -> Evita comportamento padrão (ex: recarregar página)
+        e.preventDefault()
+
+        const input = document.getElementById("inputChat");
+
+        // <elemento>.value -> Obtém o valor de um elemento
+        const mensagem = input.value;
+
+        // Adicione a mensagem do usuário ao feedChat
+        adicionarMensagem(mensagem, 'Você');
+
+        // ...
+
+    try {
+        // fetch(...)-> Faz uma requisição HTTP para uma API
+        const response = await fetch("https://pln-chatbot-api-gxajrk6c6q-rj.a.run.app/msg", {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: mensagem
+            }) // Envie a mensagem para a API
+        });
+
+        if (response.ok) {
+            const data = await response.text();
+
+            console.info(data);
+
+            // Adicione a resposta da API ao feedChat
+            adicionarMensagem(data, 'Chat');
+        } else {
+            console.error('Erro na requisição à API:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Erro ao consumir a API:', error);
+    }
+
+        // Limpe o campo de entrada após o envio da mensagem
+        input.value = '';
+    });
+</script>
+
+</body>
+</html>
