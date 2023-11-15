@@ -56,11 +56,7 @@ def extract_movies():
 
     print('Train/Test data cleaned')
 
-    # vectorizer = TfidfVectorizer()
-    # x_movies_tfidf = vectorizer.fit_transform(x_movies_cleaned)
-
     x_movies_cleaned_lemma = [preprocessing_lemma(movies, nlp) for movies in x_movies_cleaned]
-    x_teste_cleanned_lemma = [preprocessing_lemma(movies, nlp) for movies in x_movies_cleaned]
 
     print('Train/Test data lemma processed')
 
@@ -68,9 +64,9 @@ def extract_movies():
         dump(y, w)
 
     with open(MOVIES_CLEANED_LEMMA_DATASET, 'wb') as w:
-        dump(x_movies_cleaned_lemma, w)
+        dump(x.tolist(), w)
 
     with open(TESTS_CLEANED_LEMMA_DATASET, 'wb') as w:
-        dump(x_teste_cleanned_lemma, w)
+        dump(x_movies_cleaned_lemma, w)
 
     print('Train/Test data saved')
