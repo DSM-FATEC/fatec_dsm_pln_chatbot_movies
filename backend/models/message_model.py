@@ -7,4 +7,5 @@ class MessageModel(BaseModel):
 
 class MessageModelResponse(BaseModel):
     answer: str
-    sentiment: str
+    question_sentiment: str
+    answer_sentiment: str

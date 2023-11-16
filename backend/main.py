@@ -31,7 +31,7 @@ from extractors.movies_extractor import (
 # SENTENCES_PICKLE = 'datasources/sentences.pickle'
 # TOKENS_PICKLE = 'datasources/tokens.pickle'
 
-HELLO_MESSAGE = "Hello! let's talk about movies? Some keywords that might be used:"
+HELLO_MESSAGE = "Hello! let's talk about movies? To see some keywords that might be used just digit: show keywords <sentiment>, where sentiment can be neutral, positive, negative or all"
 SORRY_MESSAGE = "Sorry, i couldn't find any answer to your question, try again with other words"
 
 # Instanciando o FastAPI
@@ -50,14 +50,14 @@ app.add_middleware(
 def answer_msg(body: MessageModel) -> MessageModelResponse:
     question = clean_text(body.message)
 
-    with open(Y_DATASET, 'rb') as r:
-        targets = load(r)
+    # with open(Y_DATASET, 'rb') as r:
+    #     targets = load(r)
 
     with open(MOVIES_CLEANED_LEMMA_DATASET, 'rb') as r:
         all_sentences = load(r)
 
-    with open(TESTS_CLEANED_LEMMA_DATASET, 'rb') as r:
-        tests = load(r)
+    # with open(TESTS_CLEANED_LEMMA_DATASET, 'rb') as r:
+    #     tests = load(r)
 
     with open(NEGATIVE_SENTENCES, 'rb') as r:
         negative_sentences = load(r)
@@ -68,31 +68,41 @@ def answer_msg(body: MessageModel) -> MessageModelResponse:
     with open(NEUTRAL_SENTENCES, 'rb') as r:
         neutral_sentences = load(r)
 
+    sentiment_mapping = {
+        SENTIMENT_NEGATIVE: negative_sentences,
+        SENTIMENT_POSITIVE: positive_sentences,
+        SENTIMENT_NEUTRAL: neutral_sentences,
+        'all': all_sentences,
+    }
+
     if body.message in ('hi', 'hello'):
-        return MessageModelResponse(answer=f'{HELLO_MESSAGE} {make_word_cloud(all_sentences)}',
-                                    sentiment=SENTIMENT_NEUTRAL)
+        return MessageModelResponse(answer=f'{HELLO_MESSAGE}',
+                                    question_sentiment=SENTIMENT_NEUTRAL,
+                                    answer_sentiment=SENTIMENT_NEUTRAL)
 
-    # is_question_negative = is_sentence_negative(question, tests[:len(targets)], targets)
+    if 'show keywords' in body.message:
+        keyword_sentiment = body.message.replace('show keywords', '').strip()
+        word_cloud = make_word_cloud(sentiment_mapping[keyword_sentiment])
+
+        return MessageModelResponse(answer=word_cloud,
+                                    question_sentiment=get_sentiment(body.message),
+                                    answer_sentiment=get_sentiment(word_cloud))
+
     question_sentiment = get_sentiment(question)
-
-    answer_sentences = neutral_sentences
-
-    if question_sentiment == SENTIMENT_NEGATIVE:
-        answer_sentences = negative_sentences
-    elif question_sentiment == SENTIMENT_POSITIVE:
-        answer_sentences = positive_sentences
-
-    index = get_answer_index(preprocessed_sentences=answer_sentences,
+    answer_index = get_answer_index(preprocessed_sentences=sentiment_mapping[question_sentiment],
                              preprocessed_message=question)
 
     answer = SORRY_MESSAGE
     try:
-        answer = remove_html_tags(answer_sentences[index])
+        answer = remove_html_tags(sentiment_mapping[question_sentiment][answer_index])
     except:
         answer = SORRY_MESSAGE
 
+    answer_sentiment = get_sentiment(answer)
+
     return MessageModelResponse(answer=answer,
-                                sentiment=question_sentiment)
+                                question_sentiment=question_sentiment,
+                                answer_sentiment=answer_sentiment)
 
 
 if __name__ == '__main__':
