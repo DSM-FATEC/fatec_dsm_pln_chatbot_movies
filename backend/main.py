@@ -69,7 +69,8 @@ def answer_msg(body: MessageModel) -> MessageModelResponse:
         neutral_sentences = load(r)
 
     if body.message in ('hi', 'hello'):
-        return f'{HELLO_MESSAGE} {make_word_cloud(all_sentences)}'
+        return MessageModelResponse(answer=f'{HELLO_MESSAGE} {make_word_cloud(all_sentences)}',
+                                    sentiment=SENTIMENT_NEUTRAL)
 
     # is_question_negative = is_sentence_negative(question, tests[:len(targets)], targets)
     question_sentiment = get_sentiment(question)

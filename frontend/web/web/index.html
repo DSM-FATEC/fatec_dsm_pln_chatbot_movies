@@ -55,7 +55,7 @@
 
     try {
         // fetch(...)-> Faz uma requisição HTTP para uma API
-        const response = await fetch("https://pln-chatbot-api-gxajrk6c6q-rj.a.run.app/msg", {
+        const response = await fetch("http://localhost:8000/msg", {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
@@ -67,12 +67,10 @@
         });
 
         if (response.ok) {
-            const data = await response.text();
-
-            console.info(data);
+            const data = await response.json();
 
             // Adicione a resposta da API ao feedChat
-            adicionarMensagem(data, 'Chat');
+            adicionarMensagem(data.answer, 'Chat');
         } else {
             console.error('Erro na requisição à API:', response.statusText);
         }
