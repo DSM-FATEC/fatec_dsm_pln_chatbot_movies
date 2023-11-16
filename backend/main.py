@@ -7,14 +7,24 @@ from uvicorn import run
 from nltk import download
 
 # from extractors.wikipedia_extractor import extract_cats
-from parsers.spacy_parser import clean_text, is_sentence_negative
+from parsers.spacy_parser import (
+    clean_text,
+    get_sentiment,
+    is_sentence_negative,
+    SENTIMENT_NEGATIVE,
+    SENTIMENT_NEUTRAL,
+    SENTIMENT_POSITIVE
+)
 from parsers.word_cloud_parser import make_word_cloud, remove_html_tags
-from models.message_model import MessageModel
+from models.message_model import MessageModel, MessageModelResponse
 from responders.chatbot import get_answer_index
 from extractors.movies_extractor import (
     Y_DATASET,
     MOVIES_CLEANED_LEMMA_DATASET,
     TESTS_CLEANED_LEMMA_DATASET,
+    NEGATIVE_SENTENCES,
+    POSITIVE_SENTENCES,
+    NEUTRAL_SENTENCES,
 )
 
 
@@ -37,30 +47,51 @@ app.add_middleware(
 
 
 @app.post('/msg')
-def answer_msg(body: MessageModel) -> str:
-    preprocessed_message = clean_text(body.message)
+def answer_msg(body: MessageModel) -> MessageModelResponse:
+    question = clean_text(body.message)
 
     with open(Y_DATASET, 'rb') as r:
         targets = load(r)
 
     with open(MOVIES_CLEANED_LEMMA_DATASET, 'rb') as r:
-        movies = load(r)
+        all_sentences = load(r)
 
     with open(TESTS_CLEANED_LEMMA_DATASET, 'rb') as r:
         tests = load(r)
 
+    with open(NEGATIVE_SENTENCES, 'rb') as r:
+        negative_sentences = load(r)
+
+    with open(POSITIVE_SENTENCES, 'rb') as r:
+        positive_sentences = load(r)
+
+    with open(NEUTRAL_SENTENCES, 'rb') as r:
+        neutral_sentences = load(r)
+
     if body.message in ('hi', 'hello'):
-        return f'{HELLO_MESSAGE} {make_word_cloud(movies)}'
+        return f'{HELLO_MESSAGE} {make_word_cloud(all_sentences)}'
 
-    index = get_answer_index(preprocessed_sentences=tests,
-                             preprocessed_message=preprocessed_message)
+    # is_question_negative = is_sentence_negative(question, tests[:len(targets)], targets)
+    question_sentiment = get_sentiment(question)
 
-    print(is_sentence_negative(preprocessed_message, movies, targets))
+    answer_sentences = neutral_sentences
 
+    if question_sentiment == SENTIMENT_NEGATIVE:
+        answer_sentences = negative_sentences
+    elif question_sentiment == SENTIMENT_POSITIVE:
+        answer_sentences = positive_sentences
+
+    index = get_answer_index(preprocessed_sentences=answer_sentences,
+                             preprocessed_message=question)
+
+    answer = SORRY_MESSAGE
     try:
-        return remove_html_tags(movies[index])
+        answer = remove_html_tags(answer_sentences[index])
     except:
-        return SORRY_MESSAGE
+        answer = SORRY_MESSAGE
+
+    return MessageModelResponse(answer=answer,
+                                sentiment=question_sentiment)
 
 
 if __name__ == '__main__':

@@ -1,19 +1,26 @@
-# from goose3 import Goose
-
 import re
 from pickle import dump
 
 import spacy
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn import tree
+
+from parsers.spacy_parser import (
+    get_sentiment,
+    SENTIMENT_NEGATIVE,
+    SENTIMENT_POSITIVE,
+    SENTIMENT_NEUTRAL
+)
 
 
 MOVIES_DATASET = 'datasources/input/movie.csv'
 MOVIES_CLEANED_LEMMA_DATASET = 'datasources/output/movies_cleaned.pickle'
 TESTS_CLEANED_LEMMA_DATASET = 'datasources/output/tests_cleaned.pickle'
 Y_DATASET = 'datasources/output/y.pickle'
+NEGATIVE_SENTENCES = 'datasources/output/negative_sentences.pickle'
+POSITIVE_SENTENCES = 'datasources/output/positive_sentences.pickle'
+NEUTRAL_SENTENCES = 'datasources/output/neutral_sentences.pickle'
+
 
 def preprocessing(sentence, nlp):
     sentence = re.sub(r'@[A-Za-z0-9]+', ' ', str(sentence))
@@ -60,6 +67,22 @@ def extract_movies():
 
     print('Train/Test data lemma processed')
 
+    negative_sentences = []
+    positive_sentences = []
+    neutral_sentences = []
+
+    for sentence in x.tolist():
+        sentence_sentiment = get_sentiment(sentence)
+
+        if sentence_sentiment == SENTIMENT_NEGATIVE:
+            negative_sentences.append(sentence)
+        elif sentence_sentiment == SENTIMENT_POSITIVE:
+            positive_sentences.append(sentence)
+        elif sentence_sentiment == SENTIMENT_NEUTRAL:
+            neutral_sentences.append(sentence)
+
+    print('Sentiment data processed')
+
     with open(Y_DATASET, 'wb') as w:
         dump(y, w)
 
@@ -70,3 +93,14 @@ def extract_movies():
         dump(x_movies_cleaned_lemma, w)
 
     print('Train/Test data saved')
+
+    with open(NEGATIVE_SENTENCES, 'wb') as w:
+        dump(negative_sentences, w)
+
+    with open(POSITIVE_SENTENCES, 'wb') as w:
+        dump(positive_sentences, w)
+
+    with open(NEUTRAL_SENTENCES, 'wb') as w:
+        dump(neutral_sentences, w)
+
+    print('Sentiment data saved')

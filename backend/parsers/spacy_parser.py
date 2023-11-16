@@ -1,7 +1,13 @@
 import spacy
+from spacytextblob.spacytextblob import SpacyTextBlob
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.tree import DecisionTreeClassifier
+
+
+SENTIMENT_POSITIVE = 'positive'
+SENTIMENT_NEUTRAL = 'neutral'
+SENTIMENT_NEGATIVE = 'negative'
 
 
 def token_is_valid(token):
@@ -36,6 +42,20 @@ def preprocessing_lemma(sentence, nlp):
     return tokens
 
 
+def get_sentiment(sentence: str) -> str:
+    nlp = spacy.load('pt_core_news_sm')
+    nlp.add_pipe('spacytextblob')
+    doc = nlp(sentence.lower())
+
+    if doc._.polarity < -0.5:
+        return SENTIMENT_NEGATIVE
+
+    if doc._.polarity > 0.5:
+        return SENTIMENT_POSITIVE
+
+    return SENTIMENT_NEUTRAL
+
+
 def is_sentence_negative(sentence: str, dataset, targets) -> bool:
     dataset = dataset.tolist()
 
@@ -49,7 +69,5 @@ def is_sentence_negative(sentence: str, dataset, targets) -> bool:
 
     predictions = model.predict(dataset_tfidf)
     score = predictions[-1]
-
-    print(f'Classificação: {score}')
 
     return score == 0
