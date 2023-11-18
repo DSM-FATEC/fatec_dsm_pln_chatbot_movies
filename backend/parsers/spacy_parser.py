@@ -1,8 +1,17 @@
+from pickle import load
+
 import spacy
 from spacytextblob.spacytextblob import SpacyTextBlob
-
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.tree import DecisionTreeClassifier
+
+MOVIES_DATASET = 'datasources/input/movie.csv'
+MOVIES_CLEANED_LEMMA_DATASET = 'datasources/output/movies_cleaned.pickle'
+TESTS_CLEANED_LEMMA_DATASET = 'datasources/output/tests_cleaned.pickle'
+Y_DATASET = 'datasources/output/y.pickle'
+NEGATIVE_SENTENCES = 'datasources/output/negative_sentences.pickle'
+POSITIVE_SENTENCES = 'datasources/output/positive_sentences.pickle'
+NEUTRAL_SENTENCES = 'datasources/output/neutral_sentences.pickle'
 
 
 SENTIMENT_POSITIVE = 'positive'
@@ -56,18 +65,25 @@ def get_sentiment(sentence: str) -> str:
     return SENTIMENT_NEUTRAL
 
 
-def is_sentence_negative(sentence: str, dataset, targets) -> bool:
-    dataset = dataset.tolist()
+# def get_sentiment(sentence: str) -> str:
+#     with open(Y_DATASET, 'rb') as r:
+#         targets = load(r)
 
-    vectorizer = TfidfVectorizer()
-    tfidf = vectorizer.fit_transform(dataset)
-    model = DecisionTreeClassifier(criterion='entropy')
-    model.fit(tfidf, targets)
+#     with open(MOVIES_CLEANED_LEMMA_DATASET, 'rb') as r:
+#         all_sentences = load(r)
 
-    dataset.append(sentence)
-    dataset_tfidf = vectorizer.transform(dataset)
+#     vectorizer = TfidfVectorizer()
+#     tfidf = vectorizer.fit_transform(all_sentences)
+#     model = DecisionTreeClassifier(criterion='entropy')
+#     model.fit(tfidf, targets)
 
-    predictions = model.predict(dataset_tfidf)
-    score = predictions[-1]
+#     all_sentences.append(sentence)
+#     dataset_tfidf = vectorizer.transform(all_sentences)
 
-    return score == 0
+#     predictions = model.predict(dataset_tfidf)
+#     score = predictions[-1]
+
+#     if score == 0:
+#         return SENTIMENT_NEGATIVE
+
+#     return SENTIMENT_POSITIVE
