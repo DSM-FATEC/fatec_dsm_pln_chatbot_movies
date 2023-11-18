@@ -10,7 +10,6 @@ from nltk import download
 from parsers.spacy_parser import (
     clean_text,
     get_sentiment,
-    is_sentence_negative,
     SENTIMENT_NEGATIVE,
     SENTIMENT_NEUTRAL,
     SENTIMENT_POSITIVE
@@ -31,7 +30,7 @@ from extractors.movies_extractor import (
 # SENTENCES_PICKLE = 'datasources/sentences.pickle'
 # TOKENS_PICKLE = 'datasources/tokens.pickle'
 
-HELLO_MESSAGE = "Hello! let's talk about movies? To see some keywords that might be used just digit: show keywords <sentiment>, where sentiment can be neutral, positive, negative or all"
+HELLO_MESSAGE = "Hello! let's talk about movies? To see some keywords that might be used just digit: show keywords {sentiment}, where {sentiment} can be neutral, positive, negative or all"
 SORRY_MESSAGE = "Sorry, i couldn't find any answer to your question, try again with other words"
 
 # Instanciando o FastAPI
