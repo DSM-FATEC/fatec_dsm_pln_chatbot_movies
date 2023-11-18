@@ -33,7 +33,7 @@
                 <span>${deQuem}: ${mensagem}</span>
             </div>
         `;
-    }
+    } 
 
     // document.getElementById -> Obtém elemento pelo seu id
     const form = document.getElementById("formChat");
@@ -81,6 +81,45 @@
         // Limpe o campo de entrada após o envio da mensagem
         input.value = '';
     });
+
+    
+    // Função para obter o sentimento da mensagem
+    function obterSentimentoDaMensagem(mensagem) {
+
+        if (mensagem.includes('"answer_sentiment":"neutral"')) {
+            return 'neutral';
+        } else if (mensagem.includes('"answer_sentiment":"positive"')) {
+            return 'positive';
+        } else if (mensagem.includes('"answer_sentiment":"negative"')) {
+            return 'negative';
+        }
+
+        return null;
+        }
+
+        // Função para adicionar imagem no canto direito com base no sentimento
+        function adicionarImagemCantoDireito(sentimento) {
+        const feed = document.getElementById("feedChat");
+        let imagemSrc = '';
+
+        // Determine a imagem com base no sentimento
+        if (sentimento === 'neutral') {
+            imagemSrc = 'neutra.png';
+        } else if (sentimento === 'positive') {
+            imagemSrc = 'feliz.png';
+        } else if (sentimento === 'negative') {
+            imagemSrc = 'triste.png';
+        }
+
+        // Adiciona a imagem no canto direito
+        if (imagemSrc) {
+            feed.innerHTML += `
+                <div style="text-align: right;">
+                    <img src="${imagemSrc}" alt="${sentimento}" style="width: 50px; height: 50px; margin-right: 10px;">
+                </div>
+            `;
+        }
+        }
 </script>
 
     <footer>
