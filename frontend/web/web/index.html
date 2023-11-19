@@ -33,7 +33,7 @@
                 <span>${deQuem}: ${mensagem}</span>
             </div>
         `;
-    } 
+    }
 
     // document.getElementById -> Obtém elemento pelo seu id
     const form = document.getElementById("formChat");
@@ -68,9 +68,11 @@
 
         if (response.ok) {
             const data = await response.json();
+            // const sentimento =
 
             // Adicione a resposta da API ao feedChat
             adicionarMensagem(data.answer, 'Chat');
+            adicionarImagemCantoDireito(data.answer_sentiment);
         } else {
             console.error('Erro na requisição à API:', response.statusText);
         }
@@ -82,23 +84,23 @@
         input.value = '';
     });
 
-    
+
     // Função para obter o sentimento da mensagem
     function obterSentimentoDaMensagem(mensagem) {
 
-        if (mensagem.includes('"answer_sentiment":"neutral"')) {
+        if (mensagem.answer_sentiment === "neutral") {
             return 'neutral';
-        } else if (mensagem.includes('"answer_sentiment":"positive"')) {
+        } else if (mensagem.answer_sentiment === "positive") {
             return 'positive';
-        } else if (mensagem.includes('"answer_sentiment":"negative"')) {
+        } else if (mensagem.answer_sentiment == "negative") {
             return 'negative';
         }
 
         return null;
-        }
+    }
 
-        // Função para adicionar imagem no canto direito com base no sentimento
-        function adicionarImagemCantoDireito(sentimento) {
+    // Função para adicionar imagem no canto direito com base no sentimento
+    function adicionarImagemCantoDireito(sentimento) {
         const feed = document.getElementById("feedChat");
         let imagemSrc = '';
 
@@ -111,20 +113,20 @@
             imagemSrc = 'triste.png';
         }
 
-        // Adiciona a imagem no canto direito
+        // Adiciona a imagem no canto direitoimagemSrc
         if (imagemSrc) {
             feed.innerHTML += `
                 <div style="text-align: right;">
-                    <img src="${imagemSrc}" alt="${sentimento}" style="width: 50px; height: 50px; margin-right: 10px;">
+                    <img src="${imagemSrc}" alt="${sentimento}" style="width: 25px; height: 25px; margin-right: 10px;">
                 </div>
             `;
         }
-        }
+    }
 </script>
 
-    <footer>
+    <!-- <footer>
         <p>&copy; 2023 <a href="https://br.freepik.com/vetores-gratis/padrao-sem-emenda-com-elementos-do-cinema_8084126.htm#query=cinema%20desenho&position=8&from_view=keyword&track=ais">Imagem de dgim-studio</a> no Freepik. Todos os direitos reservados.</p>
-    </footer>
+    </footer> -->
 
 </body>
 </html>
